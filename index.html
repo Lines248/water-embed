@@ -1,13 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Water Embed</title>
-  <style>body { margin:0; overflow:hidden; }</style>
+  <style>
+    html, body { margin: 0; width:100%; height:100%; overflow:hidden; }
+    canvas { display:block; width:100%; height:100%; }
+  </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/objects/Water2.js"></script>
-  <script src="main.js"></script>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
+    import { Water } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/objects/Water.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/controls/OrbitControls.js';
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    // Scene & Camera
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 1, 20000);
+    camera.position.set(30, 30, 100);
+
+    // Water
+    const waterGeo = new THREE.PlaneGeometry(10000, 10000);
+    const water = new Water(waterGeo, {
+      color: 0x001e0f, scale: 1,
+      flowDirection: new THREE.Vector2(1,1),
+      textureWidth: 1024, textureHeight: 1024
+    });
+    water.rotation.x = - Math.PI/2;
+    scene.add(water);
+
+    // Light & Controls
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(-1,1,1);
+    scene.add(light);
+    new OrbitControls(camera, renderer.domElement);
+
+    // Animate
+    (function animate(){
+      requestAnimationFrame(animate);
+      water.material.uniforms.time.value += 1/60;
+      renderer.render(scene, camera);
+    })();
+
+    // Resize
+    window.addEventListener('resize', ()=>{
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
